@@ -1,11 +1,3 @@
 name = "netd-stock-app"
 compatibility_date = "2024-09-01"
 pages_build_output_dir = "."
-
-# Cloudflare D1 Database Binding
-# In Cloudflare Pages Dashboard, go to Settings > Functions > D1 database bindings
-# and bind variable name 'DB' to your created D1 database (e.g. 'netd_it_db')
-[[d1_databases]]
-binding = "DB"
-database_name = "netd_it_db"
-database_id = "add41ca4-e84e-4a65-871c-cb105038d029"
