@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="lo" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NETD IT SOLUTIONS - Stock, Project & CRM Management</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & Chart.js & JsBarcode -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex min-h-screen">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="app-sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-200 ease-in-out lg:translate-x-0 -translate-x-full flex flex-col justify-between">
+    <div>
+      <!-- Brand & Logo -->
+      <div class="p-5 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800">
+        <img src="./Logo.png" alt="NETD Logo" class="h-10 w-auto object-contain rounded-lg shadow-sm">
+        <div>
+          <h1 class="font-extrabold text-base tracking-tight text-blue-600 dark:text-blue-400">NETD IT</h1>
+          <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Solutions App</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-3 space-y-1 text-sm font-medium">
+        <a href="javascript:void(0)" onclick="App.navigateTo('dashboard')" data-view="dashboard" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span data-i18n="nav_dashboard">ແຜງຄວບຄຸມ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="App.navigateTo('stock')" data-view="stock" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="package" class="w-5 h-5"></i>
+          <span data-i18n="nav_stock">ສາງສິນຄ້າ & ອຸປະກອນ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="App.navigateTo('projects')" data-view="projects" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+          <span data-i18n="nav_projects">ໂຄງການ & ວຽກໄອທີ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="App.navigateTo('customers')" data-view="customers" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span data-i18n="nav_customers">ລູກຄ້າ & CRM</span>
+        </a>
+        <a href="javascript:void(0)" onclick="App.navigateTo('invoices')" data-view="invoices" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          <span data-i18n="nav_invoices">ໃບສະເໜີລາຄາ & ໃບບິນ</span>
+        </a>
+        <a href="javascript:void(0)" onclick="App.navigateTo('settings')" data-view="settings" class="nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition cursor-pointer">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span data-i18n="nav_settings">ຕັ້ງຄ່າ & ສໍາຮອງຂໍ້ມູນ</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+      <span class="font-mono">v2.5 • NETD IT</span>
+      <div id="cloudflare-status-badge"></div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN WRAPPER ================= -->
+  <div class="flex-1 lg:ml-64 flex flex-col min-w-0">
+
+    <!-- Top Header -->
+    <header id="app-header" class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200/80 dark:border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3 flex-1 max-w-xl">
+        <!-- Mobile Drawer Toggle -->
+        <button onclick="App.toggleMobileSidebar()" class="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Global Search -->
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" id="global-search-input" data-i18n-placeholder="search_placeholder" placeholder="Search anything..." class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100">
+        </div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="flex items-center gap-2">
+        <!-- Manage Users (Admin Only) -->
+        <button onclick="AuthModule.openUserManagementModal()" class="admin-only hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-semibold shadow-sm transition">
+          <i data-lucide="users" class="w-3.5 h-3.5"></i>
+          <span data-i18n="btn_manage_users">👥 ຈັດການຜູ້ໃຊ້</span>
+        </button>
+
+        <!-- Quick Add Product -->
+        <button onclick="StockModule.openAddModal()" class="admin-only hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span data-i18n="add_product">ເພີ່ມສິນຄ້າ</span>
+        </button>
+
+        <!-- Language Switcher -->
+        <button onclick="App.toggleLanguage()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i data-lucide="globe" class="w-4 h-4 text-blue-600"></i>
+          <span id="current-lang-label">🇱🇦 ລາວ</span>
+        </button>
+
+        <!-- Dark/Light Theme Switcher -->
+        <button onclick="App.toggleTheme()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition" title="Toggle Theme">
+          <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        </button>
+
+        <!-- Auth User Badge -->
+        <div id="auth-user-badge"></div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- Viewer Mode Notice Banner (Hidden for Admin) -->
+      <div id="viewer-permission-banner" class="hidden bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-xs text-amber-900 dark:text-amber-200" data-i18n="viewer_notice_title">ໂໝດເບິ່ງຂໍ້ມູນຢ່າງດຽວ (Viewer Mode)</h4>
+            <p class="text-[11px] text-amber-700 dark:text-amber-300/80 mt-0.5" data-i18n="viewer_notice_desc">
+              ທ່ານກໍາລັງເຂົ້າໃຊ້ງານດ້ວຍສິດທິ Viewer. ທ່ານສາມາດເບິ່ງຂໍ້ມູນ, ຄົ້ນຫາ ແລະ ສັ່ງພິມໄດ້, ແຕ່ບໍ່ສາມາດເພີ່ມ/ແກ້ໄຂ/ລຶບຂໍ້ມູນໄດ້.
+            </p>
+          </div>
+        </div>
+        <button onclick="AuthModule.openLoginModal()" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shrink-0 shadow-sm transition">
+          Switch to Admin
+        </button>
+      </div>
+
+      <!-- ================= 1. VIEW: DASHBOARD ================= -->
+      <div id="view-dashboard" class="app-view space-y-6">
+        <!-- Welcome Banner with Multi-Period Selector -->
+        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-800 rounded-3xl p-6 lg:p-8 text-white shadow-lg relative overflow-hidden">
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="max-w-xl">
+              <span class="inline-block bg-white/20 backdrop-blur text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                NETD Analytics Center
+              </span>
+              <h2 class="text-2xl lg:text-3xl font-extrabold" data-i18n="dashboard_title">ແຜງຄວບຄຸມທຸລະກິດ (Dashboard)</h2>
+              <p class="text-blue-100 text-xs lg:text-sm mt-1.5 leading-relaxed" data-i18n="dashboard_subtitle">
+                ສະຫຼຸບພາບລວມສາງສິນຄ້າ, ໂຄງການໄອທີ ແລະ ລາຍຮັບຂອງ NETD IT SOLUTIONS
+              </p>
+            </div>
+
+            <!-- Time Period Tabs (Daily, Weekly, Monthly, Yearly) -->
+            <div class="bg-white/10 backdrop-blur p-1.5 rounded-2xl flex flex-wrap gap-1 border border-white/20 self-start md:self-auto">
+              <button id="dash-period-daily" onclick="DashboardModule.setPeriod('daily')" class="dash-period-btn px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-200 hover:bg-white/10" data-i18n="tab_daily">
+                ລາຍວັນ
+              </button>
+              <button id="dash-period-weekly" onclick="DashboardModule.setPeriod('weekly')" class="dash-period-btn px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-200 hover:bg-white/10" data-i18n="tab_weekly">
+                ລາຍອາທິດ
+              </button>
+              <button id="dash-period-monthly" onclick="DashboardModule.setPeriod('monthly')" class="dash-period-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow transition" data-i18n="tab_monthly">
+                ລາຍເດືອນ
+              </button>
+              <button id="dash-period-yearly" onclick="DashboardModule.setPeriod('yearly')" class="dash-period-btn px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-200 hover:bg-white/10" data-i18n="tab_yearly">
+                ລາຍປີ
+              </button>
+            </div>
+          </div>
+          <!-- Decorative circle background -->
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        </div>
+
+        <!-- Period Analytics Highlight Card -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 p-5 rounded-2xl border border-blue-200 dark:border-slate-700 shadow-sm">
+            <div class="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 mb-1">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+              <span id="dash-period-title">ລາຍເດືອນ (Monthly)</span>
+            </div>
+            <div id="dash-period-revenue" class="text-2xl font-extrabold font-mono text-gray-900 dark:text-white">0 ₭</div>
+            <div class="text-[11px] text-gray-500 mt-1">ຍອດຂາຍ/ລາຍຮັບໃນຊ່ວງເວລານີ້</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center justify-between mb-1">
+              <span>ຈຳນວນໃບບິນທີ່ອອກ</span>
+              <i data-lucide="receipt" class="w-4 h-4 text-purple-500"></i>
+            </div>
+            <div id="dash-period-invoices-count" class="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">0 ໃບ</div>
+            <div class="text-[11px] text-gray-500 mt-1">Invoices Issued in Period</div>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm cursor-pointer" onclick="App.navigateTo('invoices'); InvoicesModule.setTab('invoice');">
+            <div class="text-xs font-medium text-amber-600 dark:text-amber-400 flex items-center justify-between mb-1">
+              <span data-i18n="stat_pending_payments">ຍອດລໍຖ້າຊຳລະ</span>
+              <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+            </div>
+            <div id="dash-stat-pending" class="text-2xl font-extrabold font-mono text-amber-600 dark:text-amber-400">0 ₭</div>
+            <div class="text-[11px] text-gray-500 mt-1">Total Pending Receivables</div>
+          </div>
+        </div>
+
+        <!-- 4 Stat Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <!-- Total SKUs -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm card-hover">
+            <div class="flex items-center justify-between text-blue-600 dark:text-blue-400 mb-2">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400" data-i18n="stat_total_products">ສິນຄ້າທັງໝົດ</span>
+              <i data-lucide="package" class="w-5 h-5"></i>
+            </div>
+            <div id="dash-stat-products" class="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">0</div>
+          </div>
+
+          <!-- Low Stock Alerts -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm card-hover cursor-pointer" onclick="App.navigateTo('stock'); StockModule.setFilter('low_stock');">
+            <div class="flex items-center justify-between text-amber-500 mb-2">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400" data-i18n="stat_low_stock">ສິນຄ້າໃກ້ໝົດ</span>
+              <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            </div>
+            <div id="dash-stat-lowstock" class="text-2xl font-extrabold font-mono text-amber-600 dark:text-amber-400">0</div>
+          </div>
+
+          <!-- Active Projects -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm card-hover cursor-pointer" onclick="App.navigateTo('projects');">
+            <div class="flex items-center justify-between text-indigo-500 mb-2">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400" data-i18n="stat_active_projects">ໂຄງການກຳລັງເຮັດ</span>
+              <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+            </div>
+            <div id="dash-stat-projects" class="text-2xl font-extrabold font-mono text-indigo-600 dark:text-indigo-400">0</div>
+          </div>
+
+          <!-- Inventory Total Value -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm card-hover">
+            <div class="flex items-center justify-between text-slate-500 mb-2">
+              <span class="text-xs font-medium text-slate-500 dark:text-slate-400" data-i18n="stat_inventory_value">ມູນຄ່າສາງສິນຄ້າ</span>
+              <i data-lucide="database" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <div id="dash-stat-inventory-val" class="text-xl font-extrabold font-mono text-slate-900 dark:text-white">0 ₭</div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Chart 1: Inventory Value by Category -->
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i>
+              <span data-i18n="chart_category_distribution">ມູນຄ່າສິນຄ້າແບ່ງຕາມໝວດໝູ່</span>
+            </h3>
+            <div class="h-64 relative">
+              <canvas id="chart-categories"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Revenue Trend Bar Chart -->
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+              <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-600"></i>
+              <span>ຍອດຂາຍ/ລາຍຮັບຕາມຊ່ວງເວລາ (Revenue Breakdown)</span>
+            </h3>
+            <div class="h-64 relative">
+              <canvas id="chart-revenue"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts & Recent Activities -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Low Stock Action List -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="font-bold text-xs text-red-600 flex items-center gap-1.5 uppercase tracking-wider" data-i18n="urgent_stock_alerts">
+              ⚠️ ສິນຄ້າທີ່ຕ້ອງສັ່ງຊື້ດ່ວນ
+            </h3>
+            <div id="dash-lowstock-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Upcoming Project Deadlines -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="font-bold text-xs text-blue-600 flex items-center gap-1.5 uppercase tracking-wider" data-i18n="upcoming_deadlines">
+              📅 ກຳນົດສົ່ງມອບໂຄງການ
+            </h3>
+            <div id="dash-deadlines-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+          </div>
+
+          <!-- Recent Movements -->
+          <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+            <h3 class="font-bold text-xs text-slate-500 flex items-center gap-1.5 uppercase tracking-wider" data-i18n="recent_activities">
+              ⚡ ການເຄື່ອນໄຫວຫຼ້າສຸດ
+            </h3>
+            <div id="dash-recent-activities" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 2. VIEW: STOCK & INVENTORY ================= -->
+      <div id="view-stock" class="app-view space-y-6 hidden">
+        <!-- Stock Top Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" data-i18n="stock_title">ຈັດການສາງສິນຄ້າ & ອຸປະກອນໄອທີ</h2>
+            <p class="text-xs text-slate-500 mt-0.5" data-i18n="stock_subtitle">ຕິດຕາມຈຳນວນ, ຕົ້ນທຶນ, ລາຄາຂາຍ ແລະ Serial Number</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="StockModule.openCategoryModal()" class="admin-only px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 transition shadow-sm" title="Manage Product Categories">
+              <i data-lucide="tags" class="w-4 h-4"></i>
+              <span>🏷️ ຈັດການໝວດໝູ່</span>
+            </button>
+            <button onclick="StockModule.openQuickStockModal(null, 'In')" class="admin-only px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+              <span data-i18n="btn_stock_in">+ Stock In (ນຳເຂົ້າ SN)</span>
+            </button>
+            <button onclick="StockModule.openQuickStockModal(null, 'Out')" class="admin-only px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              <span data-i18n="btn_stock_out">- Stock Out (ເບີກຈ່າຍ)</span>
+            </button>
+            <button onclick="StockModule.openAddModal()" class="admin-only px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span data-i18n="add_product">ເພີ່ມສິນຄ້າໃໝ່</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Summary Drill-Down Cards -->
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">ສະຫຼຸບຈຳນວນສິນຄ້າຕາມໝວດໝູ່ (ຄລິກເພື່ອເບິ່ງລາຍການ):</span>
+          </div>
+          <div id="stock-category-cards-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+        </div>
+
+        <!-- Stock Main Navigation Tabs: Inventory vs Disbursed Registry -->
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800">
+          <div class="flex gap-4">
+            <button id="stock-tab-btn-inventory" onclick="StockModule.setStockTab('inventory')" class="stock-main-tab-btn py-3 px-2 text-xs font-bold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 flex items-center gap-2 transition">
+              <i data-lucide="boxes" class="w-4 h-4"></i>
+              <span>ສາງສິນຄ້າທັງໝົດ (Active Inventory)</span>
+            </button>
+            <button id="stock-tab-btn-disbursed" onclick="StockModule.setStockTab('disbursed')" class="stock-main-tab-btn py-3 px-2 text-xs font-bold border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-2 transition" data-i18n="tab_disbursed_stock">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+              <span>📑 ລາຍການທີ່ເບີກຈ່າຍແລ້ວ (Disbursed Registry)</span>
+            </button>
+          </div>
+          <button onclick="StockModule.exportCSV()" class="text-xs font-semibold text-gray-500 hover:text-blue-600 flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+          </button>
+        </div>
+
+        <!-- Search & Category Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="stock-search-input" data-i18n-placeholder="search_stock" placeholder="ຄົ້ນຫາຊື່ສິນຄ້າ, SKU, ຍີ່ຫໍ້, SN..." class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-xs">
+          </div>
+          <select id="stock-category-filter" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-medium"></select>
+        </div>
+
+        <!-- 1. Inventory Table Section -->
+        <div id="stock-inventory-section" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Product Details</th>
+                  <th>Category</th>
+                  <th>Stock Qty</th>
+                  <th>Cost Price</th>
+                  <th>Sale Price</th>
+                  <th>Warranty</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="stock-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Disbursed Items Section -->
+        <div id="stock-disbursed-section" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm hidden">
+          <div class="overflow-x-auto">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Product & SKU</th>
+                  <th>Qty</th>
+                  <th>Disbursed SN / MAC Numbers</th>
+                  <th>Recipient / Project</th>
+                  <th>Technician</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="stock-disbursed-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 3. VIEW: PROJECTS & IT SERVICES ================= -->
+      <div id="view-projects" class="app-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" data-i18n="nav_projects">ໂຄງການ & ວຽກໄອທີ</h2>
+            <p class="text-xs text-slate-500 mt-0.5">ຕິດຕາມວຽກຕິດຕັ້ງ Network, CCTV, Server ແລະ ຄິດໄລ່ກຳໄລ</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="ProjectsModule.openAddModal()" class="admin-only px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span data-i18n="add_project">ສ້າງໂຄງການໃໝ່</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Status Filters & View Toggles -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex gap-2">
+            <button id="prj-tab-all" onclick="ProjectsModule.setTab('all')" class="project-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold border-b-2 border-blue-600 text-blue-600 dark:text-blue-400">ທັງໝົດ</button>
+            <button id="prj-tab-in_progress" onclick="ProjectsModule.setTab('in_progress')" class="project-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-500">ກຳລັງເຮັດ (In Progress)</button>
+            <button id="prj-tab-completed" onclick="ProjectsModule.setTab('completed')" class="project-tab-btn px-3 py-1.5 rounded-xl text-xs font-medium text-gray-500">ສຳເລັດແລ້ວ (Completed)</button>
+          </div>
+          <div class="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            <button id="view-cards-btn" onclick="ProjectsModule.setViewMode('cards')" class="p-1.5 rounded-lg bg-blue-600 text-white"><i data-lucide="layout-grid" class="w-4 h-4"></i></button>
+            <button id="view-table-btn" onclick="ProjectsModule.setViewMode('table')" class="p-1.5 rounded-lg text-gray-500"><i data-lucide="list" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+
+        <div id="projects-container"></div>
+      </div>
+
+      <!-- ================= 4. VIEW: CUSTOMERS & CRM ================= -->
+      <div id="view-customers" class="app-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" data-i18n="nav_customers">ລູກຄ້າ & CRM</h2>
+            <p class="text-xs text-slate-500 mt-0.5">ຈັດການຖານຂໍ້ມູນລູກຄ້າອົງກອນ, ບໍລິສັດ ແລະ ບຸກຄົນ</p>
+          </div>
+          <button onclick="CustomersModule.openAddModal()" class="admin-only px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span data-i18n="add_customer">ເພີ່ມລູກຄ້າໃໝ່</span>
+          </button>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Client / Company</th>
+                  <th>Contact Person</th>
+                  <th>Phone / Email</th>
+                  <th>Type</th>
+                  <th>Address</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 5. VIEW: INVOICES & QUOTATIONS ================= -->
+      <div id="view-invoices" class="app-view space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" data-i18n="nav_invoices">ໃບສະເໜີລາຄາ & ໃບບິນ</h2>
+            <p class="text-xs text-slate-500 mt-0.5">ອອກເອກະສານ Quotation, Invoice, Receipt ຂະໜາດ A4</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="InvoicesModule.openCreateModal('Quotation')" class="admin-only px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>+ ໃບສະເໜີລາຄາ (Quotation)</span>
+            </button>
+            <button onclick="InvoicesModule.openCreateModal('Invoice')" class="admin-only px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>+ ໃບເກັບເງິນ (Invoice)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex gap-3 border-b border-gray-200 dark:border-gray-800">
+          <button id="doc-tab-all" onclick="InvoicesModule.setTab('all')" class="doc-tab-btn py-3 px-3 text-xs font-bold border-b-2 border-blue-600 text-blue-600">ທັງໝົດ</button>
+          <button id="doc-tab-quotation" onclick="InvoicesModule.setTab('quotation')" class="doc-tab-btn py-3 px-3 text-xs font-medium text-gray-500">ໃບສະເໜີລາຄາ (Quotations)</button>
+          <button id="doc-tab-invoice" onclick="InvoicesModule.setTab('invoice')" class="doc-tab-btn py-3 px-3 text-xs font-medium text-gray-500">ໃບເກັບເງິນ (Invoices)</button>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Doc No</th>
+                  <th>Type</th>
+                  <th>Client / Project</th>
+                  <th>Dates</th>
+                  <th>Grand Total</th>
+                  <th>Status (System)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoices-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 6. VIEW: SETTINGS & BACKUP ================= -->
+      <div id="view-settings" class="app-view space-y-6 hidden">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900 dark:text-white" data-i18n="settings_title">ຕັ້ງຄ່າລະບົບ & ສໍາຮອງຂໍ້ມູນ</h2>
+          <p class="text-xs text-slate-500 mt-0.5" data-i18n="settings_subtitle">ຈັດການຂໍ້ມູນບໍລິສັດ NETD IT SOLUTIONS, ສະກຸນເງິນ ແລະ ຖານຂໍ້ມູນ</p>
+        </div>
+
+        <!-- Company Settings Form -->
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="company_info">ຂໍ້ມູນບໍລິສັດ / ຮ້ານ</h3>
+          <form onsubmit="App.saveSettingsForm(event)" class="space-y-4 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold mb-1" data-i18n="label_company_name">ຊື່ບໍລິສັດ / ຮ້ານ</label>
+                <input type="text" id="set-company-name" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1" data-i18n="label_company_tagline">ຄໍາຂວັນ / ບໍລິການຫຼັກ</label>
+                <input type="text" id="set-tagline" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold mb-1" data-i18n="label_company_phone">ເບີໂທຕິດຕໍ່</label>
+                <input type="text" id="set-phone" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1" data-i18n="label_company_email">ອີເມວ</label>
+                <input type="email" id="set-email" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold mb-1" data-i18n="label_company_address">ທີ່ຢູ່ສໍານັກງານ</label>
+              <input type="text" id="set-address" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1" data-i18n="label_company_bank_info">ຂໍ້ມູນບັນຊີທະນາຄານ (ສໍາລັບໃສ່ໃນໃບບິນ)</label>
+              <textarea id="set-bank-info" rows="2" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono"></textarea>
+            </div>
+            <div class="flex justify-end admin-only">
+              <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow" data-i18n="btn_save">ບັນທຶກການຕັ້ງຄ່າ</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Backup & Cloudflare Sync Management -->
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+          <h3 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="data_management">ການຈັດການຂໍ້ມູນ & ສໍາຮອງ (Backup & Cloud Sync)</h3>
+          <div id="cf-settings-status" class="text-xs"></div>
+          <div class="flex flex-wrap gap-3">
+            <button onclick="window.db.exportBackupJSON()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span data-i18n="btn_export_backup">ດາວໂຫຼດໄຟລ໌ສໍາຮອງ (Export JSON)</span>
+            </button>
+            <label class="admin-only px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span data-i18n="btn_import_backup">ກູ້ຄືນຂໍ້ມູນຈາກໄຟລ໌ (Import JSON)</span>
+              <input type="file" accept=".json" onchange="App.handleImportBackup(event)" class="hidden">
+            </label>
+            <button onclick="App.resetToDemoData()" class="admin-only px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              <span data-i18n="btn_reset_sample">ໂຫຼດຂໍ້ມູນຕົວຢ່າງ (Demo Data)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================= MODALS SECTION ================= -->
+
+  <!-- 1. Stock In / Out Modal with SN & MAC -->
+  <div id="stock-trans-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="w-5 h-5 text-blue-600"></i>
+          <span>ນຳເຂົ້າ / ເບີກຈ່າຍສິນຄ້າ (Stock Movement)</span>
+        </h3>
+        <button onclick="App.closeModal('stock-trans-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form onsubmit="StockModule.saveStockTransaction(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold mb-1">ເລືອກສິນຄ້າ (Product) *</label>
+          <select id="stock-trans-product" onchange="StockModule.handleStockTransTypeChange()" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ປະເພດການເຄື່ອນໄຫວ *</label>
+            <select id="stock-trans-type" onchange="StockModule.handleStockTransTypeChange()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="In">+ ນຳເຂົ້າ (Stock In)</option>
+              <option value="Out">- ເບີກຈ່າຍ (Stock Out)</option>
+              <option value="Adjust">ປັບຍອດສະຕັອກ (Adjust)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຈຳນວນ (Quantity) *</label>
+            <input type="number" id="stock-trans-qty" min="1" value="1" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+        </div>
+
+        <!-- Dynamic Stock IN Serial / MAC section -->
+        <div id="stock-trans-in-sn-section" class="p-3 bg-blue-50/50 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900/40 space-y-2">
+          <label class="block font-bold text-blue-700 dark:text-blue-300">ປ້ອນໝາຍເລກ Serial Number (SN) / MAC Address (ແຍກດ້ວຍຈຸດ ຫຼື ຂຶ້ນແຖວໃໝ່):</label>
+          <textarea id="stock-trans-in-sn" rows="2" placeholder="SN-MT2026-01&#10;SN-MT2026-02" class="w-full p-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 font-mono text-xs"></textarea>
+          <input type="text" id="stock-trans-in-mac" placeholder="MAC Address ທີ່ກົງກັນ (ທາງເລືອກ)" class="w-full p-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 font-mono text-xs">
+        </div>
+
+        <!-- Dynamic Stock OUT Available SN section -->
+        <div id="stock-trans-out-sn-section" class="p-3 bg-amber-50/50 dark:bg-amber-950/30 rounded-xl border border-amber-100 dark:border-amber-900/40 space-y-2 hidden">
+          <label class="block font-bold text-amber-700 dark:text-amber-300">ເລືອກໝາຍເລກ SN/MAC ທີ່ຕ້ອງການເບີກຈ່າຍ:</label>
+          <div id="stock-trans-available-serials" class="space-y-1 max-h-36 overflow-y-auto"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ເບີກຈ່າຍໃຫ້ (Recipient / Client)</label>
+            <select id="stock-trans-recipient" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຜູກກັບໂຄງການ (Project)</label>
+            <select id="stock-trans-project" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ເລກທີເອກະສານອ້າງອີງ</label>
+            <input type="text" id="stock-trans-ref" placeholder="e.g. PO-2026, PRJ-001" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຜູ້ດຳເນີນການ (Operator)</label>
+            <input type="text" id="stock-trans-operator" value="Keoviengxay" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ໝາຍເຫດ</label>
+          <textarea id="stock-trans-note" rows="2" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('stock-trans-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow">ບັນທຶກລາຍການ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Category Drill-Down Detail Modal (Item-by-Item 1 to N) -->
+  <div id="category-detail-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <div id="category-detail-title" class="font-bold text-base text-slate-900 dark:text-white">
+          <div class="flex items-center gap-2">
+            <i data-lucide="folder-open" class="w-5 h-5 text-blue-600"></i>
+            <span>ລາຍລະອຽດສິນຄ້າໃນໝວດໝູ່</span>
+          </div>
+        </div>
+        <button onclick="App.closeModal('category-detail-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border-b">
+            <tr>
+              <th class="p-3 text-center w-12">#</th>
+              <th class="p-3 text-left">Product Name & Model</th>
+              <th class="p-3 text-left">SKU</th>
+              <th class="p-3 text-left">Serial Number / MAC</th>
+              <th class="p-3 text-center">Unit Status</th>
+              <th class="p-3 text-right">Sale Price</th>
+              <th class="p-3 text-center">Actions (ຈັດການ)</th>
+            </tr>
+          </thead>
+          <tbody id="category-detail-list-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Product Add/Edit Modal -->
+  <div id="product-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 id="product-modal-title" class="font-bold text-base text-slate-900 dark:text-white" data-i18n="modal_add_product">ເພີ່ມສິນຄ້າໃໝ່</h3>
+        <button onclick="App.closeModal('product-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="product-form" onsubmit="StockModule.saveProductForm(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="product-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold mb-1">ລະຫັດ SKU *</label>
+            <input type="text" id="prod-sku" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຊື່ສິນຄ້າ *</label>
+            <input type="text" id="prod-name" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold mb-1">ໝວດໝູ່ (Category) *</label>
+            <select id="prod-category" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium"></select>
+            <div id="prod-category-custom-container" class="mt-2 hidden">
+              <input type="text" id="prod-category-custom" placeholder="ພິມຊື່ໝວດໝູ່ໃໝ່..." class="w-full p-2 rounded-xl border border-blue-400 bg-blue-50/50 dark:bg-slate-800">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຍີ່ຫໍ້ (Brand)</label>
+            <input type="text" id="prod-brand" placeholder="e.g. MikroTik, Cisco, Dahua" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block font-semibold mb-1">ລຸ້ນ (Model)</label>
+            <input type="text" id="prod-model" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Serial / LOT Number</label>
+            <input type="text" id="prod-serial" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຫົວໜ່ວຍ (Unit)</label>
+            <input type="text" id="prod-unit" value="Unit" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ຕົ້ນທຶນ (Cost)</label>
+            <input type="number" id="prod-cost" min="0" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ລາຄາຂາຍ (Sale)</label>
+            <input type="number" id="prod-sale" min="0" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold text-blue-600">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຈຳນວນເລີ່ມຕົ້ນ</label>
+            <input type="number" id="prod-qty" min="0" value="1" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ແຈ້ງເຕືອນເມື່ອຕໍ່າກວ່າ</label>
+            <input type="number" id="prod-min-alert" min="0" value="3" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ໄລຍະຮັບປະກັນ (ເດືອນ)</label>
+            <input type="number" id="prod-warranty" min="0" value="12" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ບ່ອນເກັບຮັກສາ (Location)</label>
+            <input type="text" id="prod-location" placeholder="e.g. Rack A-01" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຜູ້ສະໜອງ (Supplier)</label>
+            <input type="text" id="prod-supplier" placeholder="e.g. Cisco Distributor" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ໝາຍເຫດ (Notes)</label>
+          <input type="text" id="prod-notes" placeholder="ລາຍລະອຽດເພີ່ມເຕີມ..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('product-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow">ບັນທຶກສິນຄ້າ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Project Add/Edit Modal with Custom Type & Browse Quotation -->
+  <div id="project-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <div>
+          <h3 id="project-modal-title" class="font-bold text-base text-slate-900 dark:text-white" data-i18n="modal_add_project">ສ້າງໂຄງການໃໝ່</h3>
+          <p class="text-[11px] text-gray-500">ບັນທຶກຂໍ້ມູນໂຄງການ, ມູນຄ່າ ແລະ ອຸປະກອນ</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- Browse Quotation Button -->
+          <button type="button" onclick="ProjectsModule.openBrowseQuotationModal()" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span data-i18n="btn_browse_quotation">📄 Browse ໃບສະເໜີລາຄາ</span>
+          </button>
+          <button onclick="App.closeModal('project-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <form id="project-form" onsubmit="ProjectsModule.saveProjectForm(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="project-id">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ລະຫັດໂຄງການ *</label>
+            <input type="text" id="prj-code" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div class="sm:col-span-2">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold">ລູກຄ້າ *</label>
+              <button type="button" onclick="ProjectsModule.openQuickAddCustomerModal()" class="text-blue-600 dark:text-blue-400 text-[11px] font-semibold hover:underline flex items-center gap-1">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> <span>+ ເພີ່ມລູກຄ້າໃໝ່</span>
+              </button>
+            </div>
+            <select id="prj-customer" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"></select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ຊື່ໂຄງການ *</label>
+          <input type="text" id="prj-name" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ປະເພດວຽກໄອທີ *</label>
+            <select id="prj-type" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium"></select>
+            <div id="prj-type-custom-container" class="mt-2 hidden">
+              <input type="text" id="prj-type-custom" placeholder="ພິມປະເພດວຽກໄອທີໃໝ່..." class="w-full p-2 rounded-xl border border-blue-400 bg-blue-50/50 dark:bg-slate-800">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ມູນຄ່າໂຄງການ (LAK) *</label>
+            <input type="number" id="prj-contract-val" min="0" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຕົ້ນທຶນປະມານການ (LAK)</label>
+            <input type="number" id="prj-est-cost" min="0" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ວັນທີເລີ່ມຕົ້ນ</label>
+            <input type="date" id="prj-start-date" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ກຳນົດສົ່ງມອບ</label>
+            <input type="date" id="prj-end-date" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຄວາມສຳຄັນ</label>
+            <select id="prj-priority" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <option value="Normal">Normal</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ສະຖານະ *</label>
+            <select id="prj-status" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="Draft">Draft</option>
+              <option value="Quotation">Quotation</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ຫົວໜ້າທີມ / ຜູ້ຮັບຜິດຊອບ</label>
+          <input type="text" id="prj-team-lead" placeholder="e.g. Keoviengxay (Solutions Architect)" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ລາຍລະອຽດໜ້າວຽກ</label>
+          <textarea id="prj-desc" rows="2" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></textarea>
+        </div>
+
+        <!-- Dynamic Tasks List in Project Form -->
+        <div class="border-t border-slate-100 dark:border-slate-800 pt-3">
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-bold text-xs text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="check-square" class="w-4 h-4 text-blue-600"></i>
+              <span>ລາຍການໜ້າວຽກໂຄງການ (Project Tasks)</span>
+            </label>
+            <button type="button" onclick="ProjectsModule.addInlineTaskToForm()" class="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[11px] font-bold hover:bg-blue-100 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>+ ເພີ່ມ Task</span>
+            </button>
+          </div>
+          <div id="prj-form-tasks-container" class="space-y-2 max-h-48 overflow-y-auto"></div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('project-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow">ບັນທຶກ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4.1 Dedicated Project Task Modal (Add/Edit Single Task) -->
+  <div id="task-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 id="task-modal-title" class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="check-square" class="w-5 h-5 text-blue-600"></i>
+          <span>ເພີ່ມ / ແກ້ໄຂໜ້າວຽກ (Task)</span>
+        </h3>
+        <button onclick="App.closeModal('task-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="task-modal-form" onsubmit="ProjectsModule.saveTaskModalForm(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="task-project-id">
+        <input type="hidden" id="task-id">
+        <div>
+          <label class="block font-semibold mb-1">ຊື່ໜ້າວຽກ (Task Title) *</label>
+          <input type="text" id="task-title" required placeholder="e.g. ຕິດຕັ້ງ Router & Switch ໃນ Server Rack" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ຜູ້ຮັບຜິດຊອບ (Assignee)</label>
+            <input type="text" id="task-assignee" placeholder="e.g. Somxay, Keoviengxay" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ກຳນົດສົ່ງ (Due Date)</label>
+            <input type="date" id="task-due-date" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ຄວາມສຳຄັນ (Priority)</label>
+            <select id="task-priority" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <option value="Normal">Normal</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ສະຖານະ (Status) *</label>
+            <select id="task-status" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="Pending">ລໍຖ້າເລີ່ມ (Pending)</option>
+              <option value="In Progress">ກຳລັງເຮັດ (In Progress)</option>
+              <option value="Done">ສຳເລັດແລ້ວ (Done)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">ລາຍລະອຽດ / ໝາຍເຫດ</label>
+          <textarea id="task-notes" rows="2" placeholder="ລາຍລະອຽດໜ້າວຽກເພີ່ມເຕີມ..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('task-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow">ບັນທຶກ Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Browse Quotation Modal -->
+  <div id="browse-quotation-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="file-spreadsheet" class="w-5 h-5 text-purple-600"></i>
+          <span>ເລືອກດຶງຂໍ້ມູນຈາກໃບສະເໜີລາຄາ</span>
+        </h3>
+        <button onclick="App.closeModal('browse-quotation-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="browse-quotations-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- 6. Quotation & Invoice Create/Edit Modal with Valid Until Date -->
+  <div id="doc-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 id="doc-modal-title" class="font-bold text-base text-slate-900 dark:text-white" data-i18n="modal_create_doc">ສ້າງເອກະສານການເງິນ</h3>
+        <button onclick="App.closeModal('doc-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="doc-form" onsubmit="InvoicesModule.saveDocForm(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="doc-id">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_doc_type">ປະເພດເອກະສານ *</label>
+            <select id="doc-type" onchange="InvoicesModule.handleTypeChange()" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="Quotation">ໃບສະເໜີລາຄາ (Quotation)</option>
+              <option value="Invoice">ໃບເກັບເງິນ (Invoice)</option>
+              <option value="Receipt">ໃບຮັບເງິນ (Receipt)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_doc_no">ເລກທີເອກະສານ *</label>
+            <input type="text" id="doc-no" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_issue_date">ວັນທີອອກ *</label>
+            <input type="date" id="doc-issue-date" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+
+          <!-- Dynamic Valid Until Date Field (under Issue Date for Quotation) -->
+          <div id="doc-valid-until-container">
+            <label class="block font-semibold mb-1 text-purple-600 dark:text-purple-400" data-i18n="label_valid_until">ນຳໃຊ້ໄດ້ເຖີງວັນທີ່ *</label>
+            <input type="date" id="doc-valid-until" class="w-full p-2.5 rounded-xl border border-purple-300 dark:border-purple-700 bg-purple-50/50 dark:bg-slate-800 font-bold text-purple-700 dark:text-purple-300">
+          </div>
+
+          <!-- Dynamic Due Date Field (Hidden for Quotation) -->
+          <div id="doc-due-date-container" class="hidden">
+            <label class="block font-semibold mb-1" data-i18n="label_due_date">ກຳນົດຊຳລະ</label>
+            <input type="date" id="doc-due-date" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold">ລູກຄ້າ *</label>
+              <button type="button" onclick="InvoicesModule.openQuickAddCustomerModal()" class="text-blue-600 dark:text-blue-400 text-[11px] font-semibold hover:underline flex items-center gap-1">
+                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> <span>+ ເພີ່ມລູກຄ້າ</span>
+              </button>
+            </div>
+            <select id="doc-customer" onchange="InvoicesModule.handleCustomerChange()" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"></select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຜູກກັບໂຄງການ (Project)</label>
+            <select id="doc-project" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></select>
+          </div>
+
+          <!-- Dynamic Reference Quotation Dropdown (Hidden for Quotation) -->
+          <div id="doc-ref-quotation-container" class="hidden">
+            <label class="block font-semibold mb-1 text-blue-600 dark:text-blue-400" data-i18n="label_ref_quotation">🔗 ອ້າງອີງໃບສະເໜີລາຄາເລກທີ</label>
+            <select id="doc-ref-quotation" onchange="InvoicesModule.handleRefQuotationChange()" class="w-full p-2.5 rounded-xl border border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-slate-800 font-semibold text-xs"></select>
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_payment_status">ສະຖານະ (System Status)</label>
+            <select id="doc-status" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold"></select>
+          </div>
+        </div>
+
+        <!-- Line Items Section -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="font-bold text-slate-800 dark:text-slate-200" data-i18n="items_list">ລາຍການສິນຄ້າ / ຄ່າບໍລິການ</h4>
+            <div class="flex gap-2">
+              <button type="button" onclick="InvoicesModule.openStockPicker()" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-semibold flex items-center gap-1" data-i18n="btn_add_from_stock">
+                <i data-lucide="package" class="w-3.5 h-3.5"></i> ເລືອກຈາກສາງ
+              </button>
+              <button type="button" onclick="InvoicesModule.addLineItem()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1" data-i18n="btn_add_line_item">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i> + ເພີ່ມແຖວ
+              </button>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-800/40">
+            <table class="w-full text-xs">
+              <thead class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  <th class="p-2.5 text-left" data-i18n="col_item_desc">ລາຍລະອຽດສິນຄ້າ / ບໍລິການ</th>
+                  <th class="p-2.5 text-center w-20" data-i18n="col_item_qty">ຈຳນວນ</th>
+                  <th class="p-2.5 text-right w-32" data-i18n="col_item_price">ລາຄາຕໍ່ໜ່ວຍ</th>
+                  <th class="p-2.5 text-right w-36" data-i18n="col_item_total">ລວມ</th>
+                  <th class="p-2.5 text-center w-10"></th>
+                </tr>
+              </thead>
+              <tbody id="doc-line-items-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totals (NO VAT) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-3">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_terms_conditions">ເງື່ອນໄຂການຊຳລະ & ການຮັບປະກັນ</label>
+            <textarea id="doc-terms" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"></textarea>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500" data-i18n="label_subtotal">ມູນຄ່າລວມ (Subtotal):</span>
+              <span id="doc-subtotal-disp" class="font-mono font-bold text-slate-900 dark:text-white">0 ₭</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500" data-i18n="label_discount">ສ່ວນຫຼຸດ (Discount):</span>
+              <input type="number" id="doc-discount" min="0" value="0" oninput="InvoicesModule.calculateTotals()" class="w-28 p-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-right text-xs">
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-700 text-sm font-bold text-blue-600 dark:text-blue-400">
+              <span data-i18n="label_grand_total">ຍອດລວມທັງໝົດ (Grand Total):</span>
+              <span id="doc-grand-total-disp" class="font-mono">0 ₭</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('doc-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold" data-i18n="btn_cancel">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow" data-i18n="btn_save">ບັນທຶກເອກະສານ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Stock Picker Modal (Pick Products to Document) -->
+  <div id="stock-picker-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="package" class="w-4 h-4 text-blue-600"></i>
+          <span>ເລືອກສິນຄ້າຈາກສາງ</span>
+        </h3>
+        <button onclick="App.closeModal('stock-picker-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="stock-picker-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- 8. A4 Print Preview Modal (NO STATUS, NO VAT, CLEAN DESIGN) -->
+  <div id="print-preview-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[95vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4 print:hidden">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="printer" class="w-4 h-4 text-blue-600"></i>
+          <span>ຕົວຢ່າງພິມເອກະສານ A4 (A4 Print Preview)</span>
+        </h3>
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow">
+            <i data-lucide="printer" class="w-4 h-4"></i> ສັ່ງພິມ (Print)
+          </button>
+          <button onclick="App.closeModal('print-preview-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div id="print-preview-content"></div>
+    </div>
+  </div>
+
+  <!-- 9. User Account Management Modal (Admin Only) -->
+  <div id="user-mgmt-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="users" class="w-5 h-5 text-purple-600"></i>
+          <span data-i18n="modal_user_mgmt">ຈັດການບັນຊີຜູ້ໃຊ້ງານ (User Management)</span>
+        </h3>
+        <button onclick="App.closeModal('user-mgmt-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Add/Edit User Form -->
+      <form onsubmit="AuthModule.saveUserForm(event)" class="bg-purple-50/50 dark:bg-purple-950/30 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/40 mb-5 space-y-3 text-xs">
+        <input type="hidden" id="user-form-id">
+        <div class="font-bold text-purple-900 dark:text-purple-200" id="user-form-title">+ ເພີ່ມຜູ້ໃຊ້ງານໃໝ່ (Add User)</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">Gmail Address *</label>
+            <input type="email" id="user-form-email" required placeholder="staff.name@gmail.com" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ຊື່ສະແດງ (Display Name) *</label>
+            <input type="text" id="user-form-name" required placeholder="e.g. Soulinthone (Staff)" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ລະຫັດຜ່ານ (Password) *</label>
+            <input type="text" id="user-form-password" required placeholder="Enter password..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ສິດທິການໃຊ້ງານ (Role) *</label>
+            <select id="user-form-role" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold">
+              <option value="admin">👑 Admin (ຈັດການໄດ້ທັງໝົດ / Full Control)</option>
+              <option value="viewer">👁️ Viewer (ເບິ່ງຂໍ້ມູນຢ່າງດຽວ / Read-Only)</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="AuthModule.resetUserForm()" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg font-semibold">Clear</button>
+          <button type="submit" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow">ບັນທຶກ User</button>
+        </div>
+      </form>
+
+      <!-- Users Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold border-b">
+            <tr>
+              <th class="p-3 text-left">User Profile</th>
+              <th class="p-3 text-left">Password</th>
+              <th class="p-3 text-left">Role</th>
+              <th class="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="user-mgmt-list-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Login Modal with Gmail & Password -->
+  <div id="login-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-5">
+        <div class="flex items-center gap-2.5">
+          <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 dark:text-white" data-i18n="login_with_google">ເຂົ້າສູ່ລະບົບດ້ວຍ Gmail & Password</h3>
+            <p class="text-[11px] text-slate-500">NETD IT Authentication System</p>
+          </div>
+        </div>
+        <button onclick="App.closeModal('login-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Fast 1-Click Login Preset Accounts -->
+      <div class="space-y-2.5 mb-5">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">ເລືອກບັນຊີດ່ວນ (1-Click Login):</div>
+        
+        <!-- Admin Account -->
+        <button type="button" onclick="AuthModule.loginWithPreset(0)" class="w-full flex items-center justify-between p-3 rounded-2xl border border-purple-200 dark:border-purple-800 bg-purple-50/60 dark:bg-purple-950/30 hover:bg-purple-100/80 transition group text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-purple-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+              👑
+            </div>
+            <div>
+              <div class="font-bold text-xs text-purple-950 dark:text-purple-200">Keoviengxay (Admin)</div>
+              <div class="text-[11px] text-purple-700 dark:text-purple-400 font-mono">netdit.admin@gmail.com • PW: admin123</div>
+            </div>
+          </div>
+          <span class="text-[10px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold">Admin</span>
+        </button>
+
+        <!-- Viewer Account -->
+        <button type="button" onclick="AuthModule.loginWithPreset(1)" class="w-full flex items-center justify-between p-3 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/30 hover:bg-amber-100/80 transition group text-left">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-500 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+              👁️
+            </div>
+            <div>
+              <div class="font-bold text-xs text-amber-950 dark:text-amber-200">Staff Member (Viewer)</div>
+              <div class="text-[11px] text-amber-700 dark:text-amber-400 font-mono">staff.viewer@gmail.com • PW: viewer123</div>
+            </div>
+          </div>
+          <span class="text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">Viewer</span>
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="relative flex items-center justify-center my-4">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-white dark:bg-slate-900 px-3 text-[11px] text-slate-400 uppercase font-semibold absolute">ຫຼື ພິມ Gmail & Password</span>
+      </div>
+
+      <!-- Custom Gmail & Password Form -->
+      <form onsubmit="event.preventDefault(); AuthModule.loginWithPassword(document.getElementById('login-gmail-input').value, document.getElementById('login-pwd-input').value)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Gmail Address *</label>
+          <div class="relative">
+            <i data-lucide="mail" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="email" id="login-gmail-input" required placeholder="your.email@gmail.com" class="w-full p-2.5 pl-9 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300" data-i18n="label_password">ລະຫັດຜ່ານ (Password) *</label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="password" id="login-pwd-input" required placeholder="••••••••" class="w-full p-2.5 pl-9 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md flex items-center justify-center gap-2 mt-2 transition">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>ເຂົ້າສູ່ລະບົບ (Sign In)</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 11. Customer Add/Edit Modal -->
+  <div id="customer-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 id="customer-modal-title" class="font-bold text-base text-slate-900 dark:text-white" data-i18n="modal_add_customer">ເພີ່ມລູກຄ້າໃໝ່</h3>
+        <button onclick="App.closeModal('customer-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="customer-form" onsubmit="CustomersModule.saveCustomerForm(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="customer-id">
+        <div>
+          <label class="block font-semibold mb-1" data-i18n="label_customer_name">ຊື່ບໍລິສັດ / ອົງກອນ / ຊື່ລູກຄ້າ *</label>
+          <input type="text" id="cust-name" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_contact_person">ຊື່ຜູ້ຕິດຕໍ່ *</label>
+            <input type="text" id="cust-contact" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_phone">ເບີໂທ / WhatsApp *</label>
+            <input type="text" id="cust-phone" required class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_email">ອີເມວ</label>
+            <input type="email" id="cust-email" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_customer_type">ປະເພດລູກຄ້າ</label>
+            <select id="cust-type" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <option value="Corporate">Corporate / Enterprise</option>
+              <option value="SME">SME / Private Business</option>
+              <option value="Government">Government / State</option>
+              <option value="Education">Education / School</option>
+              <option value="Individual">Individual</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="label_address">ທີ່ຢູ່ / ບ່ອນຕັ້ງ</label>
+            <input type="text" id="cust-address" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ເລກປະຈຳຕົວຜູ້ເສຍພາສີ (Tax ID)</label>
+            <input type="text" id="cust-tax-id" placeholder="e.g. 010203040001" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">ໝາຍເຫດ</label>
+          <textarea id="cust-notes" rows="2" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"></textarea>
+        </div>
+        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('customer-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold">ຍົກເລີກ</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow">ບັນທຶກ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 12. Quick Add Customer Modal -->
+  <div id="quick-customer-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5 text-blue-600"></i>
+          <span>ເພີ່ມຂໍ້ມູນລູກຄ້າໃໝ່ (Quick Add Client)</span>
+        </h3>
+        <button onclick="App.closeModal('quick-customer-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="quick-customer-form" onsubmit="CustomersModule.saveQuickCustomerForm(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="quick-cust-source" value="project">
+        
+        <div>
+          <label class="block font-semibold mb-1">ຊື່ບໍລິສັດ / ລູກຄ້າ *</label>
+          <input type="text" id="quick-cust-name" required placeholder="e.g. Lao Development Bank, ຮ້ານ ຄຳໄຊ ໄອທີ" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">ຜູ້ຕິດຕໍ່ *</label>
+            <input type="text" id="quick-cust-contact" required placeholder="ທ່ານ ສົມພອນ..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">ເບີໂທຕິດຕໍ່ *</label>
+            <input type="tel" id="quick-cust-phone" required placeholder="+856 20 ..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">ທີ່ຢູ່ (Address)</label>
+          <input type="text" id="quick-cust-address" placeholder="ບ້ານ, ເມືອງ, ແຂວງ..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="App.closeModal('quick-customer-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold">
+            ຍົກເລີກ
+          </button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>ບັນທຶກ & ເລືອກລູກຄ້ານີ້</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 13. Barcode Print Modal -->
+  <div id="barcode-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+      <div id="barcode-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- 14. Category Modal (Manage Categories) -->
+  <div id="category-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="tags" class="w-5 h-5 text-blue-600"></i>
+            <span>ຈັດການໝວດໝູ່ສິນຄ້າ</span>
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">ເພີ່ມ, ແກ້ໄຂຊື່ ຫຼື ລຶບໝວດໝູ່ສິນຄ້າ</p>
+        </div>
+        <button onclick="App.closeModal('category-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <form onsubmit="StockModule.addCategoryFromModal(event)" class="flex gap-2">
+          <input type="text" id="new-category-input" placeholder="ພິມຊື່ໝວດໝູ່ໃໝ່..." required class="flex-1 p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+          <button type="submit" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow shrink-0">
+            + ເພີ່ມ
+          </button>
+        </form>
+
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ໝວດໝູ່ທັງໝົດໃນລະບົບ:</div>
+        <div id="category-modal-list" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+        <button onclick="App.closeModal('category-modal')" class="px-5 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold">
+          ປິດ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. Project 360 Detail Modal -->
+  <div id="project-detail-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="folder" class="w-5 h-5 text-blue-600"></i>
+          Project Details & Work Center
+        </h3>
+        <button onclick="App.closeModal('project-detail-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="project-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- 16. Customer 360 Profile Modal -->
+  <div id="customer-360-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white" data-i18n="customer_360_view">ຂໍ້ມູນລູກຄ້າ 360° Profile</h3>
+        <button onclick="App.closeModal('customer-360-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="customer-360-content"></div>
+    </div>
+  </div>
+
+  <!-- 17. Cloudflare D1 Diagnostics & Multi-Device Sync Modal -->
+  <div id="d1-diagnostic-modal" class="modal-backdrop fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="modal-content bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+          <span>ກວດສອບສະຖານະ Cloudflare D1 Sync</span>
+        </h3>
+        <button onclick="App.closeModal('d1-diagnostic-modal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Live test output -->
+        <div id="diagnostic-results"></div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <button onclick="window.db.runDiagnosticCheck()" class="px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>ທົດສອບໃໝ່ (Re-test)</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button onclick="window.db.fetchAll(false); App.closeModal('d1-diagnostic-modal');" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition">
+              <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i>
+              <span>Sync ຂໍ້ມູນດຽວນີ້</span>
+            </button>
+            <button onclick="App.closeModal('d1-diagnostic-modal')" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold">
+              ປິດໜ້າຕ່າງ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/i18n.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/stock.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/invoices.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
