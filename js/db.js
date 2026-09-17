@@ -55,9 +55,9 @@ const DEFAULT_CUSTOMERS = [
 const DEFAULT_USERS = [
   {
     id: "USR-001",
-    email: "netdit.admin@gmail.com",
-    password: "admin123",
-    name: "Keoviengxay (Admin)",
+    email: "netditsolutions@gmail.com",
+    password: "P@ss4n3tD",
+    name: "NETD IT (Admin)",
     role: "admin",
     avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD",
     createdAt: "2026-01-01T00:00:00Z"
@@ -115,7 +115,21 @@ class DatabaseEngine {
           if (Array.isArray(parsed.projectTypes) && parsed.projectTypes.length > 0) this.data.projectTypes = parsed.projectTypes;
           if (Array.isArray(parsed.customers) && parsed.customers.length > 0) this.data.customers = parsed.customers;
           if (Array.isArray(parsed.invoices) && parsed.invoices.length > 0) this.data.invoices = parsed.invoices;
-          if (Array.isArray(parsed.users) && parsed.users.length > 0) this.data.users = parsed.users;
+          if (Array.isArray(parsed.users) && parsed.users.length > 0) {
+            this.data.users = parsed.users;
+            // Always ensure default admin and viewer exist with correct credentials
+            DEFAULT_USERS.forEach(def => {
+              const idx = this.data.users.findIndex(u => (u.email || '').toLowerCase() === def.email.toLowerCase());
+              if (idx === -1) {
+                this.data.users.unshift(def);
+              } else if (def.email.toLowerCase() === 'netditsolutions@gmail.com') {
+                this.data.users[idx].password = def.password;
+                this.data.users[idx].role = def.role;
+              }
+            });
+          } else {
+            this.data.users = [...DEFAULT_USERS];
+          }
           if (Array.isArray(parsed.stockLogs) && parsed.stockLogs.length > 0) this.data.stockLogs = parsed.stockLogs;
           if (Array.isArray(parsed.disbursedLogs) && parsed.disbursedLogs.length > 0) this.data.disbursedLogs = parsed.disbursedLogs;
           if (parsed.settings && Object.keys(parsed.settings).length > 0) {
@@ -809,9 +823,16 @@ class DatabaseEngine {
   authenticateUser(email, password) {
     if (!email || !password) return null;
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password.trim();
+
+    // 1. Direct fallback check for DEFAULT_USERS
+    const defMatch = DEFAULT_USERS.find(u => u.email.toLowerCase() === cleanEmail && u.password === cleanPass);
+    if (defMatch) return defMatch;
+
+    // 2. Check full users list
     const users = this.getUsers();
     const user = users.find(u => (u.email || '').toLowerCase() === cleanEmail);
-    if (user && user.password === password.trim()) {
+    if (user && user.password === cleanPass) {
       return user;
     }
     return null;

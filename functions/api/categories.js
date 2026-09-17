@@ -61,8 +61,10 @@ export async function onRequest(context) {
     }
 
     if (request.method === 'DELETE') {
-      const targetId = id || (await request.json().catch(() => ({}))).id;
-      const targetName = (await request.json().catch(() => ({}))).name;
+      let body = {};
+      try { body = await request.json(); } catch (_) {}
+      const targetId = id || body.id;
+      const targetName = body.name;
       if (targetId) {
         await db.prepare("DELETE FROM categories WHERE id = ?").bind(targetId).run();
       } else if (targetName) {

@@ -189,7 +189,7 @@ export async function onRequest(context) {
     const userCount = await db.prepare("SELECT COUNT(*) as count FROM users").first();
     if (!userCount || userCount.count === 0) {
       await db.batch([
-        db.prepare(`INSERT OR IGNORE INTO users (id, email, password, name, role, avatar) VALUES ('USR-001', 'netdit.admin@gmail.com', 'admin123', 'Keoviengxay (Admin)', 'admin', 'https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD')`),
+        db.prepare(`INSERT OR IGNORE INTO users (id, email, password, name, role, avatar) VALUES ('USR-001', 'netditsolutions@gmail.com', 'P@ss4n3tD', 'NETD IT (Admin)', 'admin', 'https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD')`),
         db.prepare(`INSERT OR IGNORE INTO users (id, email, password, name, role, avatar) VALUES ('USR-002', 'staff.viewer@gmail.com', 'viewer123', 'Staff Member (Viewer)', 'viewer', 'https://api.dicebear.com/7.x/bottts/svg?seed=StaffViewer')`)
       ]);
     }

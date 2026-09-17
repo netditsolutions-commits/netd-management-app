@@ -147,7 +147,7 @@ const StockModule = {
 
     if (modalBody) {
       if (products.length === 0) {
-        modalBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">ບໍ່ມີສິນຄ້າໃນໝວດໝູ່ນີ້</td></tr>';
+        modalBody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-400">ບໍ່ມີສິນຄ້າໃນໝວດໝູ່ນີ້</td></tr>';
       } else {
         // Expand products into individual item units (1 to N)
         let rowsHtml = '';
@@ -156,17 +156,20 @@ const StockModule = {
         products.forEach(p => {
           const qty = Number(p.stockQty) || 0;
           const serials = Array.isArray(p.serials) ? p.serials : [];
+          const regDate = window.db && typeof window.db.formatDate === 'function' 
+            ? window.db.formatDate(p.createdAt) 
+            : (p.createdAt ? p.createdAt.slice(0, 10) : '-');
           
           if (serials.length > 0) {
             // Render each tracked serial/MAC as individual item unit
-            serials.forEach(s => {
+            serials.forEach((s, sIdx) => {
               const isInStock = s.status === 'In Stock';
               rowsHtml += `
                 <tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-xs">
                   <td class="p-3 text-center font-mono font-bold text-gray-500 w-12">${itemIndex++}</td>
                   <td class="p-3">
                     <div class="font-bold text-gray-900 dark:text-white">${p.name}</div>
-                    <div class="text-[11px] text-gray-400">${p.brand || ''} ${p.model || ''}</div>
+                    <div class="text-[11px] text-gray-400">${p.brand || ''} ${p.model || ''} • (ເຄື່ອງທີ ${sIdx + 1}/${serials.length})</div>
                   </td>
                   <td class="p-3 font-mono font-semibold text-blue-600">${p.sku}</td>
                   <td class="p-3 font-mono">
@@ -177,6 +180,9 @@ const StockModule = {
                     <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${isInStock ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}">
                       ${isInStock ? '🟢 In Stock (ພ້ອມໃຊ້)' : '⚪ Disbursed (ເບີກແລ້ວ)'}
                     </span>
+                  </td>
+                  <td class="p-3 text-center font-mono text-gray-600 dark:text-gray-300">
+                    ${regDate}
                   </td>
                   <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white">
                     ${window.db.formatMoney(p.salePrice)}
@@ -197,7 +203,9 @@ const StockModule = {
           } else {
             // Render untracked units as unit rows from 1 to qty
             const countToRender = Math.max(1, qty);
+            const snTokens = p.serial ? p.serial.split(',').map(x => x.trim()).filter(Boolean) : [];
             for (let i = 1; i <= countToRender; i++) {
+              const currentSn = snTokens.length >= i ? snTokens[i - 1] : (p.serial ? `${p.serial} #${i}` : `Unit #${i} of ${qty}`);
               rowsHtml += `
                 <tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-xs">
                   <td class="p-3 text-center font-mono font-bold text-gray-500 w-12">${itemIndex++}</td>
@@ -206,13 +214,16 @@ const StockModule = {
                     <div class="text-[11px] text-gray-400">${p.brand || ''} ${p.model || ''} • (ລາຍການທີ ${i}/${qty})</div>
                   </td>
                   <td class="p-3 font-mono font-semibold text-blue-600">${p.sku}</td>
-                  <td class="p-3 font-mono text-gray-400 text-[11px]">
-                    ${p.serial ? `${p.serial} #${i}` : `Unit #${i} of ${qty}`}
+                  <td class="p-3 font-mono text-gray-700 dark:text-gray-300 font-semibold text-[11px]">
+                    ${currentSn}
                   </td>
                   <td class="p-3 text-center">
                     <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${qty > 0 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-red-100 text-red-800'}">
                       ${qty > 0 ? '🟢 In Stock (ພ້ອມໃຊ້)' : '🔴 Out of Stock'}
                     </span>
+                  </td>
+                  <td class="p-3 text-center font-mono text-gray-600 dark:text-gray-300">
+                    ${regDate}
                   </td>
                   <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white">
                     ${window.db.formatMoney(p.salePrice)}
@@ -578,6 +589,17 @@ const StockModule = {
     if (!categoryVal) categoryVal = 'General';
 
     const existingProduct = id ? window.db.getProduct(id) : null;
+    const serialsInput = getVal('prod-serial');
+    let serialList = [];
+    if (serialsInput) {
+      serialList = serialsInput.split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(sn => ({ sn: sn, mac: '', status: 'In Stock' }));
+    }
+
+    const enteredQty = getNum('prod-qty', 1);
+    const finalQty = serialList.length > 0 ? Math.max(enteredQty, serialList.length) : enteredQty;
 
     const productData = {
       id: id || undefined,
@@ -586,12 +608,12 @@ const StockModule = {
       category: categoryVal,
       brand: getVal('prod-brand'),
       model: getVal('prod-model'),
-      serial: getVal('prod-serial'),
-      serials: existingProduct && Array.isArray(existingProduct.serials) ? existingProduct.serials : [],
+      serial: serialsInput,
+      serials: serialList.length > 0 ? serialList : (existingProduct && Array.isArray(existingProduct.serials) ? existingProduct.serials : []),
       unit: getVal('prod-unit', 'Unit'),
       costPrice: getNum('prod-cost', 0),
       salePrice: getNum('prod-sale', 0),
-      stockQty: getNum('prod-qty', 1),
+      stockQty: finalQty,
       minAlert: getNum('prod-min-alert', 3),
       location: getVal('prod-location'),
       warrantyMonths: getNum('prod-warranty', 12),
@@ -601,14 +623,37 @@ const StockModule = {
 
     const saved = await window.db.saveProduct(productData);
     if (isNew && saved) {
-      await window.db.recordStockMovement({
+      // Record initial audit log without doubling stockQty
+      const currentUser = window.AuthModule ? window.AuthModule.getCurrentUser() : null;
+      const log = {
+        id: 'LOG-' + Date.now().toString().slice(-6),
+        date: new Date().toISOString().slice(0, 10),
         productId: saved.id,
+        productName: saved.name,
+        sku: saved.sku,
         type: 'In',
-        quantity: productData.stockQty,
+        quantity: saved.stockQty,
+        previousStock: 0,
+        newStock: saved.stockQty,
+        serials: saved.serials ? saved.serials.map(s => s.sn || s).join(', ') : '',
+        recipient: '',
+        projectName: '',
         referenceDoc: 'Initial Entry',
         note: 'New Product Registered',
-        operator: 'Admin'
-      });
+        operator: currentUser ? currentUser.name : 'Admin',
+        createdAt: new Date().toISOString()
+      };
+      if (window.db && window.db.data && Array.isArray(window.db.data.stockLogs)) {
+        window.db.data.stockLogs.unshift(log);
+        window.db.saveLocalCache();
+      }
+      try {
+        fetch(window.db.getApiUrl('/api/stock-logs'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(log)
+        }).catch(() => {});
+      } catch (e) {}
     }
 
     window.App.closeModal('product-modal');

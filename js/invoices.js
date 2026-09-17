@@ -340,10 +340,22 @@ const InvoicesModule = {
     const container = document.getElementById('doc-line-items-tbody');
     if (!container) return;
 
+    if (this.currentItems.length === 0) {
+      container.innerHTML = `
+        <tr id="doc-line-items-empty-row">
+          <td colspan="5" class="text-center py-4 text-gray-400">
+            ບໍ່ມີລາຍການສິນຄ້າ / ກະລຸນາກົດ "+ ເພີ່ມລາຍການໃໝ່" ຫຼື "ເລືອກຈາກສາງ"
+          </td>
+        </tr>
+      `;
+      this.calculateTotals();
+      return;
+    }
+
     container.innerHTML = this.currentItems.map((item, idx) => `
-      <tr class="border-b border-gray-100 dark:border-gray-700/60">
+      <tr class="border-b border-gray-100 dark:border-gray-700/60" data-row-index="${idx}">
         <td class="p-2">
-          <input type="text" value="${item.description || ''}" oninput="InvoicesModule.updateLineItem(${idx}, 'description', this.value)" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="Item description / Service">
+          <input type="text" value="${(item.description || '').replace(/"/g, '&quot;')}" oninput="InvoicesModule.updateLineItem(${idx}, 'description', this.value)" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800" placeholder="Item description / Service">
         </td>
         <td class="p-2 w-20">
           <input type="number" min="1" value="${item.qty || 1}" oninput="InvoicesModule.updateLineItem(${idx}, 'qty', this.value)" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-center font-mono font-bold">
@@ -351,12 +363,12 @@ const InvoicesModule = {
         <td class="p-2 w-32">
           <input type="number" min="0" step="1000" value="${item.price || 0}" oninput="InvoicesModule.updateLineItem(${idx}, 'price', this.value)" class="w-full text-xs p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-right font-mono">
         </td>
-        <td class="p-2 w-36 text-right font-mono font-bold text-xs text-gray-900 dark:text-white">
+        <td class="p-2 w-36 text-right font-mono font-bold text-xs text-gray-900 dark:text-white" id="doc-line-item-total-${idx}">
           ${window.db.formatMoney(item.total || 0)}
         </td>
         <td class="p-2 w-10 text-center">
-          <button type="button" onclick="InvoicesModule.removeLineItem(${idx})" class="p-1 text-red-500 hover:text-red-700">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <button type="button" onclick="InvoicesModule.removeLineItem(${idx})" class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition" title="ລຶບລາຍການ">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </td>
       </tr>
@@ -421,8 +433,15 @@ const InvoicesModule = {
     } else {
       this.currentItems[index][field] = value;
     }
-    this.currentItems[index].total = this.currentItems[index].qty * this.currentItems[index].price;
-    this.renderLineItems();
+    this.currentItems[index].total = (this.currentItems[index].qty || 1) * (this.currentItems[index].price || 0);
+    
+    // Update line total in DOM directly without destroying input focus
+    const totalEl = document.getElementById(`doc-line-item-total-${index}`);
+    if (totalEl) {
+      totalEl.textContent = window.db.formatMoney(this.currentItems[index].total);
+    }
+
+    this.calculateTotals();
   },
 
   removeLineItem(index) {

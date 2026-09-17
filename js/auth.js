@@ -11,22 +11,23 @@ const AuthModule = {
     this.loadSession();
     this.renderUserBadge();
     this.applyPermissions();
+    if (!this.currentUser) {
+      this.openMandatoryLoginModal();
+    } else {
+      this.hideLoginModal();
+    }
   },
 
   loadSession() {
     try {
-      const stored = localStorage.getItem('netd_auth_user');
+      // Purge legacy permanent auto-login key from localStorage so fresh browser visits MUST authenticate
+      localStorage.removeItem('netd_auth_user');
+
+      const stored = sessionStorage.getItem('netd_auth_session');
       if (stored) {
         this.currentUser = JSON.parse(stored);
       } else {
-        const users = window.db ? window.db.getUsers() : [];
-        this.currentUser = users.length > 0 ? users[0] : {
-          name: "Keoviengxay (Admin)",
-          email: "netdit.admin@gmail.com",
-          role: "admin",
-          avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD"
-        };
-        this.saveSession();
+        this.currentUser = null;
       }
     } catch (e) {
       this.currentUser = null;
@@ -35,8 +36,9 @@ const AuthModule = {
 
   saveSession() {
     if (this.currentUser) {
-      localStorage.setItem('netd_auth_user', JSON.stringify(this.currentUser));
+      sessionStorage.setItem('netd_auth_session', JSON.stringify(this.currentUser));
     } else {
+      sessionStorage.removeItem('netd_auth_session');
       localStorage.removeItem('netd_auth_user');
     }
   },
@@ -65,10 +67,11 @@ const AuthModule = {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const user = window.db ? window.db.authenticateUser(cleanEmail, password) : null;
+    const cleanPass = password.trim();
+    const user = window.db ? window.db.authenticateUser(cleanEmail, cleanPass) : null;
 
     if (!user) {
-      alert("⚠️ Gmail ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ! (Invalid Gmail or Password)\n\n• ບັນຊີ Admin ເລີ່ມຕົ້ນ: netdit.admin@gmail.com / admin123\n• ບັນຊີ Viewer ເລີ່ມຕົ້ນ: staff.viewer@gmail.com / viewer123");
+      alert("⚠️ ອີເມວ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ! ກະລຸນາກວດສອບຄືນໃໝ່ (Invalid Email or Password)");
       return false;
     }
 
@@ -84,7 +87,7 @@ const AuthModule = {
     this.saveSession();
     this.renderUserBadge();
     this.applyPermissions();
-    window.App.closeModal('login-modal');
+    this.hideLoginModal();
 
     const roleLabel = user.role === 'admin' ? '👑 Admin (ສິດທິຈັດການ)' : '👁️ Viewer (ສິດທິເບິ່ງຢ່າງດຽວ)';
     window.App.showToast(`Login ສຳເລັດ: ${user.name} (${roleLabel})`, 'success');
@@ -95,27 +98,58 @@ const AuthModule = {
     return true;
   },
 
-  loginWithPreset(index) {
-    if (!window.db) return;
-    const users = window.db.getUsers();
-    const user = users[index];
-    if (user) {
-      this.loginWithPassword(user.email, user.password);
-    }
-  },
-
   logout() {
     if (confirm("ທ່ານແນ່ໃຈບໍ່ວ່າຕ້ອງການປ່ຽນບັນຊີ ຫຼື ອອກຈາກລະບົບ?")) {
-      this.openLoginModal();
+      this.currentUser = null;
+      this.saveSession();
+      this.renderUserBadge();
+      this.applyPermissions();
+      this.openMandatoryLoginModal();
     }
   },
 
-  openLoginModal() {
+  openMandatoryLoginModal() {
+    const modal = document.getElementById('login-modal');
+    const closeBtn = document.getElementById('login-modal-close-btn');
+    if (closeBtn) closeBtn.classList.add('hidden');
     const emailInput = document.getElementById('login-gmail-input');
     const pwdInput = document.getElementById('login-pwd-input');
     if (emailInput) emailInput.value = '';
     if (pwdInput) pwdInput.value = '';
-    window.App.openModal('login-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    if (window.lucide) window.lucide.createIcons();
+  },
+
+  hideLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  },
+
+  openLoginModal() {
+    const closeBtn = document.getElementById('login-modal-close-btn');
+    if (closeBtn) {
+      if (!this.currentUser) {
+        closeBtn.classList.add('hidden');
+      } else {
+        closeBtn.classList.remove('hidden');
+      }
+    }
+    const emailInput = document.getElementById('login-gmail-input');
+    const pwdInput = document.getElementById('login-pwd-input');
+    if (emailInput) emailInput.value = '';
+    if (pwdInput) pwdInput.value = '';
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+    if (window.lucide) window.lucide.createIcons();
   },
 
   renderUserBadge() {

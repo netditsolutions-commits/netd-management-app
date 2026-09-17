@@ -166,5 +166,5 @@ INSERT OR IGNORE INTO categories (id, name, description, color) VALUES
 
 -- Insert Default Users
 INSERT OR IGNORE INTO users (id, email, password, name, role, avatar) VALUES
-('USR-001', 'netdit.admin@gmail.com', 'admin123', 'Keoviengxay (Admin)', 'admin', 'https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD'),
+('USR-001', 'netditsolutions@gmail.com', 'P@ss4n3tD', 'NETD IT (Admin)', 'admin', 'https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD'),
 ('USR-002', 'staff.viewer@gmail.com', 'viewer123', 'Staff Member (Viewer)', 'viewer', 'https://api.dicebear.com/7.x/bottts/svg?seed=StaffViewer');

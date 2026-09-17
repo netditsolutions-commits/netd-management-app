@@ -196,6 +196,9 @@ const App = {
   },
 
   closeModal(modalId) {
+    if (modalId === 'login-modal' && window.AuthModule && !window.AuthModule.currentUser) {
+      return; // Do not allow closing login modal when unauthenticated
+    }
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.classList.add('hidden');
@@ -206,6 +209,9 @@ const App = {
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(modal => {
+          if (modal.id === 'login-modal' && window.AuthModule && !window.AuthModule.currentUser) {
+            return;
+          }
           this.closeModal(modal.id);
         });
       }
