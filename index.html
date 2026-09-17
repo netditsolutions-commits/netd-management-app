@@ -536,7 +536,7 @@
         <!-- Company Settings Form -->
         <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
           <h3 class="font-bold text-sm text-slate-900 dark:text-white" data-i18n="company_info">ຂໍ້ມູນບໍລິສັດ / ຮ້ານ</h3>
-          <form onsubmit="App.saveSettingsForm(event)" class="space-y-4 text-xs">
+          <form id="settings-form" onsubmit="App.saveSettingsForm(event)" class="space-y-4 text-xs">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block font-semibold mb-1" data-i18n="label_company_name">ຊື່ບໍລິສັດ / ຮ້ານ</label>
@@ -561,9 +561,23 @@
               <label class="block font-semibold mb-1" data-i18n="label_company_address">ທີ່ຢູ່ສໍານັກງານ</label>
               <input type="text" id="set-address" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
             </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold mb-1">ເລກປະຈຳຕົວຜູ້ເສຍພາສີ (Tax ID)</label>
+                <input type="text" id="set-tax-id" placeholder="ຕົວຢ່າງ: 010203040506" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">ສະກຸນເງິນຫຼັກ (Currency)</label>
+                <select id="set-currency" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800">
+                  <option value="LAK">ກີບ (LAK - ₭)</option>
+                  <option value="THB">ບາດ (THB - ฿)</option>
+                  <option value="USD">ໂດລາ (USD - $)</option>
+                </select>
+              </div>
+            </div>
             <div>
               <label class="block font-semibold mb-1" data-i18n="label_company_bank_info">ຂໍ້ມູນບັນຊີທະນາຄານ (ສໍາລັບໃສ່ໃນໃບບິນ)</label>
-              <textarea id="set-bank-info" rows="2" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono"></textarea>
+              <textarea id="set-bank-info" rows="3" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono"></textarea>
             </div>
             <div class="flex justify-end admin-only">
               <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow" data-i18n="btn_save">ບັນທຶກການຕັ້ງຄ່າ</button>
