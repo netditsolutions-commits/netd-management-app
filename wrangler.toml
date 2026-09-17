@@ -3,9 +3,6 @@ compatibility_date = "2024-09-01"
 pages_build_output_dir = "."
 
 # Cloudflare D1 Database Binding
-# In Cloudflare Pages Dashboard, go to Settings > Functions > D1 database bindings
-# and bind variable name 'DB' to your created D1 database (e.g. 'netd_it_db')
-[[d1_databases]]
-binding = "DB"
-database_name = "netd_it_db"
-database_id = "local-dev-or-cf-id"
+# Bound directly in Cloudflare Pages Dashboard:
+# Go to Settings > Functions > D1 database bindings > Variable name: DB -> select your D1 DB.
+# (Do NOT put placeholder UUID here, as Cloudflare will fail deployment with Error 8000022)
