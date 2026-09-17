@@ -168,3 +168,15 @@ INSERT OR IGNORE INTO categories (id, name, description, color) VALUES
 INSERT OR IGNORE INTO users (id, email, password, name, role, avatar) VALUES
 ('USR-001', 'netditsolutions@gmail.com', 'P@ss4n3tD', 'NETD IT (Admin)', 'admin', 'https://api.dicebear.com/7.x/bottts/svg?seed=AdminNETD'),
 ('USR-002', 'staff.viewer@gmail.com', 'viewer123', 'Staff Member (Viewer)', 'viewer', 'https://api.dicebear.com/7.x/bottts/svg?seed=StaffViewer');
+
+-- Insert Default System Settings
+INSERT OR REPLACE INTO settings (key, value) VALUES
+('company_name', 'NETD IT SOLUTIONS'),
+('company_slogan', 'Total IT Solutions, Networking, CCTV & Software Services'),
+('company_phone', '02029204248 / 02056639123'),
+('company_email', 'netditsolutions@gmail.com'),
+('company_address', 'ບ້ານ ໂພນມີໄຊ, ເມືອງ ແປກ, ແຂວງ ຊຽງຂວາງ'),
+('company_bank_info', 'Bank Name: BCEL
+Account Name: NETD IT SOLUTIONS INDIVIDUAL ENTERPRISE
+ກີບ/LAK: 1301100677510
+ບາດ/THB: 1301100677538');
